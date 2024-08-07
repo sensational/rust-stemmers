@@ -1,3 +1,4 @@
+
 /*
     Extra rule for -nisse ending added 11 Dec 2009
 */
@@ -17,12 +18,12 @@ groupings ( v s_ending st_ending )
 
 stringescapes {}
 
-/* special characters (in ISO Latin I) */
+/* special characters */
 
-stringdef a"   hex 'E4'
-stringdef o"   hex 'F6'
-stringdef u"   hex 'FC'
-stringdef ss   hex 'DF'
+stringdef a"   '{U+00E4}'
+stringdef o"   '{U+00F6}'
+stringdef u"   '{U+00FC}'
+stringdef ss   '{U+00DF}'
 
 define v 'aeiouy{a"}{o"}{u"}'
 
@@ -31,16 +32,22 @@ define st_ending s_ending - 'r'
 
 define prelude as (
 
-    test repeat (
-        (
-            ['{ss}'] <- 'ss'
-        ) or next
-    )
-
-    repeat goto (
+    test repeat goto (
         v [('u'] v <- 'U') or
            ('y'] v <- 'Y')
     )
+
+    repeat (
+        [substring] among(
+            '{ss}' (<- 'ss')
+            'ae'   (<- '{a"}')
+            'oe'   (<- '{o"}')
+            'ue'   (<- '{u"}')
+            'qu'   ()
+            ''     (next)
+        )
+    )
+
 )
 
 define mark_regions as (
@@ -77,7 +84,11 @@ backwardmode (
     define standard_suffix as (
         do (
             [substring] R1 among(
-                'em' 'ern' 'er'
+                'em'
+                (   not 'syst'
+                    delete
+                )
+                'ern' 'er'
                 (   delete
                 )
                 'e' 'en' 'es'
